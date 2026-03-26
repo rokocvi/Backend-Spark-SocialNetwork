@@ -1,0 +1,28 @@
+# Build outputi
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Konfiguracija s osjetljivim podacima
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json
+
+# NuGet
+*.nupkg
+packages/
+project.lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
