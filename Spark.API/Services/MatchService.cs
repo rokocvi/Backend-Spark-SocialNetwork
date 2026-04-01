@@ -57,11 +57,21 @@ namespace Spark.API.Services
                 .Where(s => s.SparkDate == today && s.IsActive)
                 .ToListAsync();
 
+            if (!todaySparks.Any())
+            {
+                throw new Exception("Nema dostupnih sparkova za danas.");
+            }
+
             // Dohvati vec postojece matcheve za danas
             var existingMatches = await _db.Matches
                 .Where(m => m.MatchDate == today)
                 .Select(m => new { m.User1Id, m.User2Id })
                 .ToListAsync();
+
+            // Korisnici koji vec imaju match danas
+            var alreadyMatchedUsers = existingMatches
+                .SelectMany(m => new[] { m.User1Id, m.User2Id })
+                .ToHashSet();
 
             var newMatches = new List<Match>();
 
@@ -83,6 +93,11 @@ namespace Spark.API.Services
 
                     if (alreadyMatched) continue;
 
+                    // Preskoci ako jedan od korisnika vec ima match danas
+                    if (alreadyMatchedUsers.Contains(spark1.UserId) ||
+                        alreadyMatchedUsers.Contains(spark2.UserId))
+                        continue;
+
                     // Pronadi zajednicke tagove
                     var commonTags = spark1.Tags.Intersect(spark2.Tags).ToArray();
 
@@ -100,6 +115,11 @@ namespace Spark.API.Services
                         };
 
                         newMatches.Add(match);
+
+                        // Dodaj oba korisnika u already matched
+                        // da ne dobiju jos jedan match u istom runu
+                        alreadyMatchedUsers.Add(spark1.UserId);
+                        alreadyMatchedUsers.Add(spark2.UserId);
                     }
                 }
             }
@@ -131,7 +151,7 @@ namespace Spark.API.Services
             else
                 match.User2Saved = true;
 
-            // Ako oboje sačuvaju, postaje permanentan
+            // Ako oboje sacuvaju, postaje permanentan
             if (match.User1Saved && match.User2Saved)
                 match.IsPermanent = true;
 
