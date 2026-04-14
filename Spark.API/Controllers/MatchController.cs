@@ -90,5 +90,21 @@ namespace Spark.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        // GET api/match/history
+        [HttpGet("history")]
+        public async Task<IActionResult> GetMatchHistory()
+        {
+            try
+            {
+                var userId = GetUserId();
+                var result = await _matchService.GetMatchHistory(userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

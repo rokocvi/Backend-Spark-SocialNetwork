@@ -95,7 +95,8 @@ namespace Spark.API.Services
                 SenderUsername = sender.Username,
                 Content = message.Content,
                 IsRead = message.IsRead,
-                SentAt = message.SentAt
+                SentAt = message.SentAt,
+                SenderProfileImageBase64 = sender.ProfileImage != null ? Convert.ToBase64String(sender.ProfileImage) : null
             };
         }
     }

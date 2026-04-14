@@ -76,6 +76,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISparkService, SparkService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
 
 // ===== CORS =====
 builder.Services.AddCors(options =>

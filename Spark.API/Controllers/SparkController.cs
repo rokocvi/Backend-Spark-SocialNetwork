@@ -96,5 +96,21 @@ namespace Spark.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        //GET api/spark/history
+        [HttpGet("history")]
+        public async Task<IActionResult> GetSparkHistory()
+        {
+            try
+            {
+                var userId = GetUserId();
+                var result = await _sparkService.GetSparkHistory(userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

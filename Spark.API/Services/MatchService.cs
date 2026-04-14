@@ -160,6 +160,7 @@ namespace Spark.API.Services
             return MapToDto(match, userId);
         }
 
+
         // Pomocna metoda za mapiranje
         private MatchResponseDto MapToDto(Match match, Guid currentUserId)
         {
@@ -183,8 +184,23 @@ namespace Spark.API.Services
                 ExpiresAt = match.ExpiresAt,
                 ISaved = isUser1 ? match.User1Saved : match.User2Saved,
                 TheySaved = isUser1 ? match.User2Saved : match.User1Saved,
-                IsPermanent = match.IsPermanent
+                IsPermanent = match.IsPermanent,
+                MatchedProfileImageBase64 = matchedUser.ProfileImage != null ? Convert.ToBase64String(matchedUser.ProfileImage) : null
             };
+        }
+
+        public async Task<List<MatchResponseDto>> GetMatchHistory(Guid userId)
+        {
+            var matches = await _db.Matches
+                .Include(m => m.User1)
+                .Include(m => m.User2)
+                .Include(m => m.Spark1)
+                .Include(m => m.Spark2)
+                .Where(m => m.User1Id == userId || m.User2Id == userId)
+                .OrderByDescending(m => m.MatchDate)
+                .ToListAsync();
+
+            return matches.Select(m => MapToDto(m, userId)).ToList();
         }
     }
 }

@@ -14,5 +14,7 @@
         public bool ISaved { get; set; }
         public bool TheySaved { get; set; }
         public bool IsPermanent { get; set; }
+
+        public string? MatchedProfileImageBase64 { get; set; }
     }
 }

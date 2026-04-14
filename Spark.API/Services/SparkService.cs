@@ -97,5 +97,29 @@ namespace Spark.API.Services
                 CreatedAt = spark.CreatedAt
             };
         }
+
+        public async Task<IEnumerable<SparkResponseDto>> GetSparkHistory(Guid userId)
+        {
+            var sparks = await _db.Sparks
+                .Include(s => s.User)  
+                .Where(s => s.UserId == userId && s.IsActive)
+                .OrderByDescending(s => s.SparkDate)
+                .Skip(1)
+                .Take(30)
+                .ToListAsync();
+
+            return sparks.Select(s => new SparkResponseDto
+            {
+                Id = s.Id,
+                UserId = s.UserId,
+                Username = s.User.Username,
+                DisplayName = s.User.DisplayName,
+                Content = s.Content,
+                Tags = s.Tags,
+                SparkDate = s.SparkDate,
+                IsActive = s.IsActive,
+                CreatedAt = s.CreatedAt
+            });
+        }
     }
 }

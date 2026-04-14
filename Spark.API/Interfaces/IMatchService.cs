@@ -9,5 +9,6 @@ namespace Spark.API.Interfaces
         Task RunDailyMatching();
         Task<MatchResponseDto> SaveMatch(Guid matchId, Guid userId);
 
+        Task<List<MatchResponseDto>> GetMatchHistory(Guid userId);
     }
 }

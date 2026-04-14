@@ -9,6 +9,8 @@ namespace Spark.API.Interfaces
 
         Task<List<SparkResponseDto>> GetAllTodaySparks();
 
+        Task<IEnumerable<SparkResponseDto>> GetSparkHistory(Guid userId);
+
         Task<bool> DeleteSpark(Guid sparkId, Guid userId);
     }
 }
