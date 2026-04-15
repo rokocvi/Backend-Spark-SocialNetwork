@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Spark.API.Data;
+using Spark.API.Hubs;
 using Spark.API.Interfaces;
 using Spark.API.Services;
 using System.Text;
@@ -11,7 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 // ===== CONTROLLERS =====
 builder.Services.AddControllers();
 
-// ===== SWAGGER =====
 // ===== SWAGGER =====
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -25,7 +25,6 @@ builder.Services.AddSwaggerGen(options =>
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
         Description = "Upiši: Bearer {token}"
     });
-
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
@@ -67,6 +66,20 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!))
     };
+    // SignalR JWT — token se šalje kao query param jer WebSocket ne podržava headere
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/chat"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 builder.Services.AddAuthorization();
@@ -77,6 +90,7 @@ builder.Services.AddScoped<ISparkService, SparkService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddSignalR();
 
 // ===== CORS =====
 builder.Services.AddCors(options =>
@@ -87,7 +101,8 @@ builder.Services.AddCors(options =>
                 "http://localhost:5173",
                 "https://localhost:5173")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -106,5 +121,6 @@ app.UseCors("AllowReact");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();
