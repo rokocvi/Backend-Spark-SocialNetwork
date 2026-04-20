@@ -69,5 +69,11 @@ namespace Spark.API.Hubs
             await _messageService.MarkAsRead(Guid.Parse(matchId), userId);
             await Clients.OthersInGroup(matchId).SendAsync("MessagesRead"); 
         }
+
+        public async Task JoinUserGroup()
+        {
+            var userId = GetUserId();
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"user-{userId}");
+        }
     }
 }

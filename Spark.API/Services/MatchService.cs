@@ -3,16 +3,20 @@ using Spark.API.Data;
 using Spark.API.DTOs.Match;
 using Spark.API.Interfaces;
 using Spark.API.Models;
+using Spark.API.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Spark.API.Services
 {
     public class MatchService : IMatchService
     {
         private readonly AppDbContext _db;
+        private readonly IHubContext<ChatHub> _hubContext;
 
-        public MatchService(AppDbContext db)
+        public MatchService(AppDbContext db, IHubContext<ChatHub> hubContext)
         {
             _db = db;
+            _hubContext = hubContext;
         }
 
         public async Task<List<MatchResponseDto>> GetMyMatches(Guid userId)
@@ -122,12 +126,29 @@ namespace Spark.API.Services
                         alreadyMatchedUsers.Add(spark2.UserId);
                     }
                 }
+
+
             }
 
             if (newMatches.Any())
             {
                 _db.Matches.AddRange(newMatches);
                 await _db.SaveChangesAsync();
+                await NotifyMatchedUsers(newMatches);
+            }
+        }
+
+        private async Task NotifyMatchedUsers(List<Match> matches)
+        {
+            foreach (var match in matches)
+            {
+                await _hubContext.Clients
+                    .Group($"user-{match.User1Id}")
+                    .SendAsync("NewMatch");
+
+                await _hubContext.Clients
+                    .Group($"user-{match.User2Id}")
+                    .SendAsync("NewMatch");
             }
         }
 
