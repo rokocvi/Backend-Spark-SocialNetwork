@@ -10,5 +10,7 @@ namespace Spark.API.Interfaces
         Task<ProfileDto> DeleteProfile(Guid userId);
 
         Task<ProfileDto> UpdateProfileImage(Guid userId, IFormFile image);
+
+        Task<ProfileDto> GetUserProfile(string username);
     }
 }

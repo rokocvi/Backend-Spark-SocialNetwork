@@ -105,5 +105,14 @@ namespace Spark.API.Services
 
             return dto;
         }
+
+        public async Task<ProfileDto> GetUserProfile(string username)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Username == username)
+                ?? throw new Exception("Korisnik nije pronađen.");
+
+            return MapToDto(user);
+        }
     }
 }

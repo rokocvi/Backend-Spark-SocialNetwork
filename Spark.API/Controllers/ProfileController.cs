@@ -79,5 +79,20 @@ namespace Spark.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpGet("{username}")]
+
+        public async Task<IActionResult> GetUserProfile(string username)
+        {
+            try
+            {
+                var result = await _profileService.GetUserProfile(username);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }
