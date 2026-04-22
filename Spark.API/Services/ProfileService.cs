@@ -70,14 +70,40 @@ namespace Spark.API.Services
         };
 
         public async Task<ProfileDto> DeleteProfile(Guid userId)
+        {
+            var user = await _context.Users.FindAsync(userId)
+                ?? throw new Exception("Korisnik nije pronađen.");
+
+            var dto = MapToDto(user);
+
+            var messages = await _context.Messages
+                .Where(m => m.SenderId == userId)
+                .ToListAsync();
+            _context.Messages.RemoveRange(messages);
+
+            var matches = await _context.Matches
+                .Where(m => m.User1Id == userId || m.User2Id == userId)
+                .ToListAsync();
+
+            foreach (var match in matches)
             {
-                var user = await _context.Users.FindAsync(userId)
-                    ?? throw new Exception("Korisnik nije pronađen.");
-    
-                _context.Users.Remove(user);
-                await _context.SaveChangesAsync();
-    
-                return MapToDto(user);
+                var matchMessages = await _context.Messages
+                    .Where(m => m.MatchId == match.Id)
+                    .ToListAsync();
+                _context.Messages.RemoveRange(matchMessages);
+            }
+            _context.Matches.RemoveRange(matches);
+
+            var sparks = await _context.Sparks
+                .Where(s => s.UserId == userId)
+                .ToListAsync();
+            _context.Sparks.RemoveRange(sparks);
+
+          
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return dto;
         }
     }
 }
