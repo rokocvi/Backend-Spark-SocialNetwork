@@ -7,7 +7,7 @@ namespace Spark.API.Interfaces
         Task<SparkResponseDto> CreateSpark(CreateSparkDto dto, Guid userId);
         Task<SparkResponseDto?> GetTodaySpark(Guid userId);
 
-        Task<List<SparkResponseDto>> GetAllTodaySparks();
+        Task<List<SparkResponseDto>> GetAllTodaySparks(string? tag = null);
 
         Task<IEnumerable<SparkResponseDto>> GetSparkHistory(Guid userId);
 

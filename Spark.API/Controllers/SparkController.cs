@@ -64,11 +64,11 @@ namespace Spark.API.Controllers
 
         // GET api/spark/all
         [HttpGet("all")]
-        public async Task<IActionResult> GetAllTodaySparks()
+        public async Task<IActionResult> GetAllTodaySparks([FromQuery] string? tag)
         {
             try
             {
-                var result = await _sparkService.GetAllTodaySparks();
+                var result = await _sparkService.GetAllTodaySparks(tag);
                 return Ok(result);
             }
             catch (Exception ex)

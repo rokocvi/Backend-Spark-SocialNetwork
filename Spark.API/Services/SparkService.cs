@@ -55,14 +55,20 @@ namespace Spark.API.Services
             return MapToDto(spark, spark.User);
         }
 
-        public async Task<List<SparkResponseDto>> GetAllTodaySparks()
+        public async Task<List<SparkResponseDto>> GetAllTodaySparks(string? tag = null)
         {
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            var sparks = await _db.Sparks
+            var query = _db.Sparks
                 .Include(s => s.User)
-                .Where(s => s.SparkDate == today && s.IsActive)
-                .ToListAsync();
+                .Where(s => s.SparkDate == today && s.IsActive);
+
+            if(!string.IsNullOrEmpty(tag))
+            {
+                query = query.Where(s => s.Tags.Contains(tag));
+            }
+
+            var sparks = await query.ToListAsync();
 
             return sparks.Select(s => MapToDto(s, s.User)).ToList();
         }
